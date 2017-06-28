@@ -13,6 +13,8 @@ LABEL git.branch=$git_branch
 LABEL build.dockerfile=/Dockerfile
 LABEL build.on=$built_on
 
+COPY ./Dockerfile /Dockerfile
+
 # App specific section below
 
 ENV JAVA_APP_JAR app.jar
