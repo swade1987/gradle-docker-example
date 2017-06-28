@@ -14,6 +14,10 @@ VERSION=1.1.$(GO_PIPELINE_COUNTER)
 # Construct docker image name.
 IMAGE = $(ARTIFACTORY_URL)/$(ARTIFACTORY_REPO)/$(APP_NAME)
 
+build: build-app build-image
+
+push: docker-login push-image
+
 build-app:
 	docker build -t build-img -f Dockerfile.build .
 	docker run --name build-image-$(VERSION) --rm -v ${PWD}:/usr/bin/app:rw build-img clean jar
@@ -26,10 +30,10 @@ build-image:
     --build-arg built_on=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
     -t $(IMAGE):$(VERSION) .
 
-build: build-app build-image
+docker-login:
+	docker login -u $(ARTIFACTORY_USERNAME) -p $(ARTIFACTORY_PASSWORD) $(ARTIFACTORY_URL)
 
 # Push the image to our container registry and remove the image from the agent.
 push-image:
-	docker login -u $(ARTIFACTORY_USERNAME) -p $(ARTIFACTORY_PASSWORD) $(ARTIFACTORY_URL)
 	docker push $(IMAGE):$(VERSION)
 	docker rmi $(IMAGE):$(VERSION)
